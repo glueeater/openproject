@@ -298,7 +298,9 @@ module OpenProject
                 link = link_to_message(message, {:only_path => only_path}, :class => 'message')
               end
             when 'project'
-              if p = Project.visible.find_by_id(oid)
+              if p = Project.visible
+                            .where(["#{Project.table_name}.identifier = :s OR LOWER(#{Project.table_name}.name) = :s", {:s => name.downcase}])
+                            .first
                 link = link_to_project(p, {:only_path => only_path}, :class => 'project')
               end
             end
