@@ -26,34 +26,29 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
-module API
-  module V3
-    module Projects
-      class ProjectsAPI < Grape::API
+require 'spec_helper'
 
-        resources :projects do
-          params do
-            requires :id, desc: 'Project id'
-          end
+describe ::API::V3::Categories::CategoryCollectionRepresenter do
+  let(:categories) { FactoryGirl.build_list(:category, 3) }
+  let(:models)     { categories.map { |category|
+    ::API::V3::Categories::CategoryModel.new(category)
+  } }
+  let(:representer) { described_class.new(models) }
 
-          namespace ':id' do
-            before do
-              @project = Project.find(params[:id])
-              model = ::API::V3::Projects::ProjectModel.new(@project)
-              @representer =  ::API::V3::Projects::ProjectRepresenter.new(model)
-            end
+  context 'generation' do
+    subject(:generated) { representer.to_json }
 
-            get do
-              authorize(:view_project, context: @project)
-              @representer.to_json
-            end
+    it { should include_json('Categories'.to_json).at_path('_type') }
 
-            mount API::V3::Categories::CategoriesAPI
-            mount API::V3::Versions::VersionsAPI
-          end
+    it { should have_json_type(Object).at_path('_links') }
+    it 'should link to self' do
+      expect(subject).to have_json_path('_links/self/href')
+    end
 
-        end
-      end
+    describe 'categories' do
+      it { should have_json_path('_embedded/categories') }
+      it { should have_json_size(3).at_path('_embedded/categories') }
+      it { should have_json_path('_embedded/categories/2/name') }
     end
   end
 end
