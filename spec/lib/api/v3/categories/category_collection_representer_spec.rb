@@ -29,11 +29,20 @@
 require 'spec_helper'
 
 describe ::API::V3::Categories::CategoryCollectionRepresenter do
+  let(:project)    { FactoryGirl.build(:project, id: 888) }
   let(:categories) { FactoryGirl.build_list(:category, 3) }
   let(:models)     { categories.map { |category|
     ::API::V3::Categories::CategoryModel.new(category)
   } }
-  let(:representer) { described_class.new(models) }
+  let(:representer) { described_class.new(models, project: project) }
+
+  describe '#initialize' do
+    context 'with incorrect parameters' do
+      it 'should raise without a project' do
+        expect { described_class.new(models) }.to raise_error
+      end
+    end
+  end
 
   context 'generation' do
     subject(:generated) { representer.to_json }
@@ -42,7 +51,8 @@ describe ::API::V3::Categories::CategoryCollectionRepresenter do
 
     it { should have_json_type(Object).at_path('_links') }
     it 'should link to self' do
-      expect(subject).to have_json_path('_links/self/href')
+      expect(generated).to have_json_path('_links/self/href')
+      expect(parse_json(generated, '_links/self/href')).to match %r{/api/v3/projects/888/categories$}
     end
 
     describe 'categories' do

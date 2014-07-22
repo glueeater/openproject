@@ -7,7 +7,7 @@ module API
           before do
             @categories = @project.categories
             models = @categories.map { |category| ::API::V3::Categories::CategoryModel.new(category) }
-            @represented = ::API::V3::Categories::CategoryCollectionRepresenter.new(models)
+            @represented = ::API::V3::Categories::CategoryCollectionRepresenter.new(models, project: @project)
           end
 
           get do
