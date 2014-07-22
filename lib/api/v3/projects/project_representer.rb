@@ -49,6 +49,10 @@ module API
           }
         end
 
+        link 'categories' do
+          "#{root_url}api/v3/projects/#{represented.model.id}/categories"
+        end
+
         link 'versions' do
           "#{root_url}api/v3/projects/#{represented.model.id}/versions"
         end
