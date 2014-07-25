@@ -74,6 +74,11 @@ class CustomField < ActiveRecord::Base
   validate :validate_default_value_in_translations
 
   validate :validate_name
+  
+  validates :min_length, numericality: { only_integer: true, :greater_than_or_equal => 0 }
+  validates :min_length, numericality: { :less_than_or_equal_to => :max_length , :message => :greater_than_or_equal_to_max_length}
+  validates :max_length, numericality: { only_integer: true, :greater_than_or_equal => 0 }
+
 
   def initialize(attributes = nil, options = {})
     super
